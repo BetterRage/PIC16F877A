@@ -1,0 +1,19 @@
+# MPLAB IDE generated this makefile for use with GNU make.
+# Project: SUMME Grenzen.mcp
+# Date: Tue Oct 05 20:09:23 2021
+
+AS = MPASMWIN.exe
+CC = 
+LD = mplink.exe
+AR = mplib.exe
+RM = rm
+
+SUMME.cof : SUMME.o
+	$(CC) /p16F877A "SUMME.o" /u_DEBUG /z__MPLAB_BUILD=1 /z__MPLAB_DEBUG=1 /o"SUMME.cof" /M"SUMME.map" /W /x
+
+SUMME.o : SUMME.asm D:/Programme/MPLAB/MPASM\ Suite/p16f877a.inc
+	$(AS) /q /p16F877A "SUMME.asm" /l"SUMME.lst" /e"SUMME.err" /d__DEBUG=1
+
+clean : 
+	$(CC) "SUMME.o" "SUMME.hex" "SUMME.err" "SUMME.lst" "SUMME.cof"
+

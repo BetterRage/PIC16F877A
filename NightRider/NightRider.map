@@ -1,5 +1,5 @@
 MPLINK 4.49, Linker
-Linker Map File - Created Tue Oct 05 15:39:24 2021
+Linker Map File - Created Tue Oct 05 18:35:12 2021
 
                                  Section Info
                   Section       Type    Address   Location Size(Bytes)
@@ -24,23 +24,23 @@ Linker Map File - Created Tue Oct 05 15:39:24 2021
                               Symbols - Sorted by Name
                      Name    Address   Location    Storage File                     
                 ---------  ---------  ---------  --------- ---------                
-                    delay   0x000012    program     static H:\Automation\PIC16F877A\NightRider\NightRider.asm
-                     loop   0x000008    program     static H:\Automation\PIC16F877A\NightRider\NightRider.asm
-                    loop1   0x000018    program     static H:\Automation\PIC16F877A\NightRider\NightRider.asm
-                    loop2   0x000016    program     static H:\Automation\PIC16F877A\NightRider\NightRider.asm
-                    loop3   0x000014    program     static H:\Automation\PIC16F877A\NightRider\NightRider.asm
-                     main   0x000004    program     static H:\Automation\PIC16F877A\NightRider\NightRider.asm
+                    delay   0x000012    program     static E:\PIC16F877A\NightRider\NightRider.asm
+                     loop   0x000008    program     static E:\PIC16F877A\NightRider\NightRider.asm
+                    loop1   0x000018    program     static E:\PIC16F877A\NightRider\NightRider.asm
+                    loop2   0x000016    program     static E:\PIC16F877A\NightRider\NightRider.asm
+                    loop3   0x000014    program     static E:\PIC16F877A\NightRider\NightRider.asm
+                     main   0x000004    program     static E:\PIC16F877A\NightRider\NightRider.asm
 
 
 
                               Symbols - Sorted by Address
                      Name    Address   Location    Storage File                     
                 ---------  ---------  ---------  --------- ---------                
-                     main   0x000004    program     static H:\Automation\PIC16F877A\NightRider\NightRider.asm
-                     loop   0x000008    program     static H:\Automation\PIC16F877A\NightRider\NightRider.asm
-                    delay   0x000012    program     static H:\Automation\PIC16F877A\NightRider\NightRider.asm
-                    loop3   0x000014    program     static H:\Automation\PIC16F877A\NightRider\NightRider.asm
-                    loop2   0x000016    program     static H:\Automation\PIC16F877A\NightRider\NightRider.asm
-                    loop1   0x000018    program     static H:\Automation\PIC16F877A\NightRider\NightRider.asm
+                     main   0x000004    program     static E:\PIC16F877A\NightRider\NightRider.asm
+                     loop   0x000008    program     static E:\PIC16F877A\NightRider\NightRider.asm
+                    delay   0x000012    program     static E:\PIC16F877A\NightRider\NightRider.asm
+                    loop3   0x000014    program     static E:\PIC16F877A\NightRider\NightRider.asm
+                    loop2   0x000016    program     static E:\PIC16F877A\NightRider\NightRider.asm
+                    loop1   0x000018    program     static E:\PIC16F877A\NightRider\NightRider.asm
 
 

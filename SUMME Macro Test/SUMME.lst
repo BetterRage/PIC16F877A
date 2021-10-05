@@ -1,36 +1,12 @@
-MPASM  5.51                    NIGHTRIDER.ASM   10-5-2021  18:35:10         PAGE  1
+MPASM  5.51                         SUMME.ASM   10-5-2021  20:26:19         PAGE  1
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00001 ;################################################################################################
-                      00002 ;   This file is a basic code template for assembly code generation   *
-                      00003 ;   on the PIC16F877A. This file contains the basic code              *
-                      00004 ;   building blocks to build upon.                                    *  
-                      00005 ;                                                                     *
-                      00006 ;   Refer to the MPASM User's Guide for additional information on     *
-                      00007 ;   features of the assembler (Document DS33014).                     *
-                      00008 ;                                                                     *
-                      00009 ;   Refer to the respective PIC data sheet for additional             *
-                      00010 ;   information on the instruction set.                               *
-                      00011 ;                                                                     *
-                      00012 ;**********************************************************************
-                      00013 ;    Filename:      xxx.asm                                           *
-                      00014 ;    Date:                                                            *
-                      00015 ;    File Version:                                                    *
-                      00016 ;                                                                     *
-                      00017 ;    Author:                                                          *
-                      00018 ;    Company:                                                         *
-                      00019 ;**********************************************************************
-                      00020 ;    Files Required: P16F877A.INC                                     *
-                      00021 ;**********************************************************************
-                      00022 ;    Notes:                                                           *
-                      00023 ;**********************************************************************
-                      00024 
-                      00025 
-                      00026         list            p=16f877A               ; list directive to define processor
-                      00027         #include        <p16f877A.inc>  ; processor specific variable definitions
+                      00001 
+                      00002         list            p=16f877A               ; list directive to define processor
+                      00003         #include        <p16f877a.inc>  ; processor specific variable definitions
                       00001         LIST
                       00002 
                       00003 ;==========================================================================
@@ -40,90 +16,72 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00007 ;==========================================================================
                       00008 
                       00566         LIST
-                      00028         
-                      00029 ;       __CONFIG _CP_OFF & _WDT_OFF & _BODEN_OFF & _PWRTE_ON & _RC_OSC & _WRT_OFF & _LVP_ON & _CPD_OFF
-2007   3F32           00030         __CONFIG _CP_OFF & _WDT_OFF & _BODEN_OFF & _PWRTE_ON & _HS_OSC & _WRT_OFF & _LVP_OFF & _CPD_OFF
-                      00031 
-                      00032 ; '__CONFIG' directive is used to embed configuration data within .asm file.
-                      00033 ; The lables following the directive are located in the respective .inc file.
-                      00034 ; See respective data sheet for additional information on configuration word.
-                      00035 
-                      00036 
-                      00037 ;***** VARIABLE DEFINITIONS
-                      00038 
-Warning[205]: Found directive in column 1. (CBLOCK)
-                      00039 CBLOCK 0x20
-  00000020            00040 Rider           :1
-  00000021            00041 Direction       :1
-  00000022            00042 Loop1           :1
-  00000023            00043 Loop2           :1
-MPASM  5.51                    NIGHTRIDER.ASM   10-5-2021  18:35:10         PAGE  2
+                      00004         
+                      00005 ;       __CONFIG _CP_OFF & _WDT_OFF & _BODEN_OFF & _PWRTE_ON & _RC_OSC & _WRT_OFF & _LVP_ON & _CPD_OFF
+2007   3F32           00006         __CONFIG _CP_OFF & _WDT_OFF & _BODEN_OFF & _PWRTE_ON & _HS_OSC & _WRT_OFF & _LVP_OFF & _CPD_OFF
+                      00007 
+                      00008 ; '__CONFIG' directive is used to embed configuration data within .asm file.
+                      00009 ; The lables following the directive are located in the respective .inc file.
+                      00010 ; See respective data sheet for additional information on configuration word.
+                      00011 
+                      00012 
+                      00013 ;***** VARIABLE DEFINITIONS
+                      00014 
+                      00015         CBLOCK 0x20
+  00000020            00016         UGRENZE:1
+  00000021            00017         OGRENZE:1
+  00000022            00018         SUM:1
+                      00019         ENDC
+                      00020 
+                      00021 SUMME macro START, STOPP, ERGEBNIS
+                      00022         clrf W
+                      00023         movf START,70h
+                      00024         local start
+                      00025         addwf 70h,W
+                      00026         incf 70h,f
+                      00027         movf W,0x71
+                      00028         movf 0x70,W
+                      00029         subwf STOPP,W
+                      00030         SKPNZ
+                      00031         goto start
+                      00032         movf 0x71,W
+                      00033         endm
+                      00034 ;**********************************************************************
+0000                  00035         ORG     0x000           ; processor reset vector
+0000   018A           00036         clrf    PCLATH
+0001   2804           00037         goto    main            ; go to beginning of program
+0004                  00038         ORG     0x004           ; interrupt vector location
+                      00039 
+                      00040 ; isr code can go here or be located as a call subroutine elsewhere
+                      00041 
+0004                  00042 main
+0004   3000           00043         movlw .0
+0005   00A0           00044         movwf UGRENZE
+MPASM  5.51                         SUMME.ASM   10-5-2021  20:26:19         PAGE  2
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-  00000024            00044 Loop3           :1
-Warning[205]: Found directive in column 1. (ENDC)
-                      00045 ENDC
-                      00046 ;**********************************************************************
-0000                  00047         ORG     0x000           ; processor reset vector
-0000   018A           00048         clrf    PCLATH
-                      00049                         
-0001   2804           00050         goto    main            ; go to beginning of program
-                      00051 
-0004                  00052         ORG     0x004           ; interrupt vector location
-                      00053 
-                      00054 ; isr code can go here or be located as a call subroutine elsewhere
-                      00055 
-                      00056 
-0004                  00057 main
-0004   01A0           00058         clrf    Rider
-0005   01A1           00059         clrf    Direction
-0006   1420           00060         bsf     Rider,0
-0007   1003           00061         CLRC
-0008                  00062 loop
-0008   1C21           00063         btfss   Direction,0
-0009   0DA0           00064         rlf     Rider,f
-000A   1821           00065         btfsc   Direction,0
-000B   0CA0           00066         rrf     Rider,f
-000C   1BA0           00067         btfsc   Rider,7
-000D   1421           00068         bsf     Direction,0
-000E   1820           00069         btfsc   Rider,0 
-000F   1021           00070         bcf     Direction,0
-0010   2012           00071         call    delay
-0011   2808           00072         goto    loop
-                      00073 
-0012                  00074 delay
-0012   300D           00075         movlw   .13
-0013   00A4           00076         movwf   Loop3
-0014                  00077 loop3
-0014   30FA           00078         movlw   .250
-0015   00A3           00079         movwf   Loop2
-0016                  00080 loop2
-0016   30FF           00081         movlw   .255
-0017   00A2           00082         movwf   Loop1
-0018                  00083 loop1
-Message[305]: Using default destination of 1 (file).
-0018   0BA2           00084         decfsz  Loop1
-0019   2818           00085         goto    loop1
-Message[305]: Using default destination of 1 (file).
-001A   0BA3           00086         decfsz  Loop2
-001B   2816           00087         goto    loop2
-Message[305]: Using default destination of 1 (file).
-001C   0BA4           00088         decfsz  Loop3
-001D   2814           00089         goto    loop3
-001E   0008           00090         return
-                      00091         
-                      00092 
-MPASM  5.51                    NIGHTRIDER.ASM   10-5-2021  18:35:10         PAGE  3
-
-
-LOC  OBJECT CODE     LINE SOURCE TEXT
-  VALUE
-
-                      00093         END                       ; directive 'end of program'
-MPASM  5.51                    NIGHTRIDER.ASM   10-5-2021  18:35:10         PAGE  4
+0006   3003           00045         movlw .3
+0007   00A1           00046         movwf OGRENZE
+                      00047         SUMME UGRENZE, OGRENZE, SUM
+0008   0180               M         clrf W
+Warning[202]: Argument out of range.  Least significant bits used.
+0009   0820               M         movf UGRENZE,70h
+  0000                    M         local start
+000A   0770               M         addwf 70h,W
+000B   0AF0               M         incf 70h,f
+Warning[202]: Argument out of range.  Least significant bits used.
+000C   0880               M         movf W,0x71
+000D   0870               M         movf 0x70,W
+000E   0221               M         subwf OGRENZE,W
+000F   1903               M         SKPNZ
+0010   2800               M         goto start
+0011   0871               M         movf 0x71,W
+0012   2812           00048         goto $
+                      00049         END                       ; directive 'end of program'
+MPASM  5.51                         SUMME.ASM   10-5-2021  20:26:19         PAGE  3
 
 
 SYMBOL TABLE
@@ -182,7 +140,7 @@ CHS1                              00000004
 CHS2                              00000005
 CIS                               00000003
 CKE                               00000006
-MPASM  5.51                    NIGHTRIDER.ASM   10-5-2021  18:35:10         PAGE  5
+MPASM  5.51                         SUMME.ASM   10-5-2021  20:26:19         PAGE  4
 
 
 SYMBOL TABLE
@@ -210,7 +168,6 @@ DATA_ADDRESS                      00000005
 DC                                00000001
 D_A                               00000005
 D_NOT_A                           00000005
-Direction                         00000021
 EEADR                             0000010D
 EEADRH                            0000010F
 EECON1                            0000018C
@@ -240,17 +197,14 @@ INTE                              00000004
 INTEDG                            00000006
 INTF                              00000001
 IRP                               00000007
-Loop1                             00000022
-MPASM  5.51                    NIGHTRIDER.ASM   10-5-2021  18:35:10         PAGE  6
+NOT_A                             00000005
+NOT_ADDRESS                       00000005
+MPASM  5.51                         SUMME.ASM   10-5-2021  20:26:19         PAGE  5
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
-Loop2                             00000023
-Loop3                             00000024
-NOT_A                             00000005
-NOT_ADDRESS                       00000005
 NOT_BO                            00000000
 NOT_BOR                           00000000
 NOT_DONE                          00000002
@@ -265,6 +219,7 @@ NOT_W                             00000002
 NOT_WRITE                         00000002
 OBF                               00000006
 OERR                              00000001
+OGRENZE                           00000021
 OPTION_REG                        00000081
 P                                 00000004
 PCFG0                             00000000
@@ -300,15 +255,15 @@ RA2                               00000002
 RA3                               00000003
 RA4                               00000004
 RA5                               00000005
-MPASM  5.51                    NIGHTRIDER.ASM   10-5-2021  18:35:10         PAGE  7
+RB0                               00000000
+RB1                               00000001
+RB2                               00000002
+MPASM  5.51                         SUMME.ASM   10-5-2021  20:26:19         PAGE  6
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
-RB0                               00000000
-RB1                               00000001
-RB2                               00000002
 RB3                               00000003
 RB4                               00000004
 RB5                               00000005
@@ -352,23 +307,22 @@ RX9                               00000006
 RX9D                              00000000
 R_NOT_W                           00000002
 R_W                               00000002
-Rider                             00000020
 S                                 00000003
 SEN                               00000000
 SMP                               00000007
 SPBRG                             00000099
 SPEN                              00000007
 SREN                              00000005
-MPASM  5.51                    NIGHTRIDER.ASM   10-5-2021  18:35:10         PAGE  8
+SSPADD                            00000093
+SSPBUF                            00000013
+SSPCON                            00000014
+SSPCON2                           00000091
+MPASM  5.51                         SUMME.ASM   10-5-2021  20:26:19         PAGE  7
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
-SSPADD                            00000093
-SSPBUF                            00000013
-SSPCON                            00000014
-SSPCON2                           00000091
 SSPEN                             00000005
 SSPIE                             00000003
 SSPIF                             00000003
@@ -379,6 +333,8 @@ SSPM3                             00000003
 SSPOV                             00000006
 SSPSTAT                           00000094
 STATUS                            00000003
+SUM                               00000022
+SUMME                             
 SYNC                              00000004
 T0CS                              00000005
 T0IE                              00000005
@@ -418,14 +374,14 @@ TRISA2                            00000002
 TRISA3                            00000003
 TRISA4                            00000004
 TRISA5                            00000005
-MPASM  5.51                    NIGHTRIDER.ASM   10-5-2021  18:35:10         PAGE  9
+TRISB                             00000086
+TRISB0                            00000000
+MPASM  5.51                         SUMME.ASM   10-5-2021  20:26:19         PAGE  8
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
-TRISB                             00000086
-TRISB0                            00000000
 TRISB1                            00000001
 TRISB2                            00000002
 TRISB3                            00000003
@@ -466,6 +422,7 @@ TXIF                              00000004
 TXREG                             00000019
 TXSTA                             00000098
 UA                                00000001
+UGRENZE                           00000020
 W                                 00000000
 WCOL                              00000007
 WR                                00000001
@@ -477,13 +434,13 @@ _BODEN_ON                         00003FFF
 _BOREN_OFF                        00003FBF
 _BOREN_ON                         00003FFF
 _CONFIG                           00002007
-MPASM  5.51                    NIGHTRIDER.ASM   10-5-2021  18:35:10         PAGE 10
+_CPD_OFF                          00003FFF
+MPASM  5.51                         SUMME.ASM   10-5-2021  20:26:19         PAGE  9
 
 
 SYMBOL TABLE
   LABEL                             VALUE 
 
-_CPD_OFF                          00003FFF
 _CPD_ON                           00003EFF
 _CP_ALL                           00001FFF
 _CP_OFF                           00003FFF
@@ -517,33 +474,22 @@ _WRT_OFF                          00003FFF
 _XT_OSC                           00003FFD
 __16F877A                         00000001
 __DEBUG                           1
-delay                             00000012
-loop                              00000008
-loop1                             00000018
-loop2                             00000016
-loop3                             00000014
 main                              00000004
 
 
 MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
 
-0000 : XX--XXXXXXXXXXXX XXXXXXXXXXXXXXX- ---------------- ----------------
+0000 : XX--XXXXXXXXXXXX XXX------------- ---------------- ----------------
 2000 : -------X-------- ---------------- ---------------- ----------------
 
 All other memory blocks unused.
 
-Program Memory Words Used:    29
-Program Memory Words Free:  8163
-
-MPASM  5.51                    NIGHTRIDER.ASM   10-5-2021  18:35:10         PAGE 11
-
-
-
-
+Program Memory Words Used:    17
+Program Memory Words Free:  8175
 
 
 Errors   :     0
 Warnings :     2 reported,     0 suppressed
-Messages :     3 reported,     0 suppressed
+Messages :     0 reported,     0 suppressed
 
 
