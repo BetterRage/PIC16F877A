@@ -19,17 +19,20 @@
 	ENDC
 
 SUMME macro START, STOPP, ERGEBNIS
-	clrf W
-	movf START,70h
-	local start
+	clrf 71h
+	movf START,W
+	movwf 70h
+add
+	movf 71h,W
 	addwf 70h,W
+	movwf 71h	
 	incf 70h,f
-	movf W,0x71
-	movf 0x70,W
+	movf 70h,W
 	subwf STOPP,W
-	SKPNZ
-	goto start
-	movf 0x71,W
+	SKPNC
+	goto add
+	movf 71h,W
+	movwf ERGEBNIS
 	endm
 ;**********************************************************************
 	ORG     0x000      	; processor reset vector
@@ -40,11 +43,12 @@ SUMME macro START, STOPP, ERGEBNIS
 ; isr code can go here or be located as a call subroutine elsewhere
 
 main
-	movlw .0
+	movlw .8
 	movwf UGRENZE
-	movlw .3
+	movlw .20
 	movwf OGRENZE
 	SUMME UGRENZE, OGRENZE, SUM
+	NOP
 	goto $
 	END                       ; directive 'end of program'
 

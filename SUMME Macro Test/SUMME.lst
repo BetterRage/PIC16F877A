@@ -1,4 +1,4 @@
-MPASM  5.51                         SUMME.ASM   10-5-2021  20:26:19         PAGE  1
+MPASM  5.51                         SUMME.ASM   10-5-2021  22:39:26         PAGE  1
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -34,54 +34,59 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00019         ENDC
                       00020 
                       00021 SUMME macro START, STOPP, ERGEBNIS
-                      00022         clrf W
-                      00023         movf START,70h
-                      00024         local start
-                      00025         addwf 70h,W
-                      00026         incf 70h,f
-                      00027         movf W,0x71
-                      00028         movf 0x70,W
-                      00029         subwf STOPP,W
-                      00030         SKPNZ
-                      00031         goto start
-                      00032         movf 0x71,W
-                      00033         endm
-                      00034 ;**********************************************************************
-0000                  00035         ORG     0x000           ; processor reset vector
-0000   018A           00036         clrf    PCLATH
-0001   2804           00037         goto    main            ; go to beginning of program
-0004                  00038         ORG     0x004           ; interrupt vector location
-                      00039 
-                      00040 ; isr code can go here or be located as a call subroutine elsewhere
-                      00041 
-0004                  00042 main
-0004   3000           00043         movlw .0
-0005   00A0           00044         movwf UGRENZE
-MPASM  5.51                         SUMME.ASM   10-5-2021  20:26:19         PAGE  2
+                      00022         clrf 71h
+                      00023         movf START,W
+                      00024         movwf 70h
+                      00025 add
+                      00026         movf 71h,W
+                      00027         addwf 70h,W
+                      00028         movwf 71h       
+                      00029         incf 70h,f
+                      00030         movf 70h,W
+                      00031         subwf STOPP,W
+                      00032         SKPNC
+                      00033         goto add
+                      00034         movf 71h,W
+                      00035         movwf ERGEBNIS
+                      00036         endm
+                      00037 ;**********************************************************************
+0000                  00038         ORG     0x000           ; processor reset vector
+0000   018A           00039         clrf    PCLATH
+0001   2804           00040         goto    main            ; go to beginning of program
+0004                  00041         ORG     0x004           ; interrupt vector location
+                      00042 
+                      00043 ; isr code can go here or be located as a call subroutine elsewhere
+                      00044 
+MPASM  5.51                         SUMME.ASM   10-5-2021  22:39:26         PAGE  2
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-0006   3003           00045         movlw .3
-0007   00A1           00046         movwf OGRENZE
-                      00047         SUMME UGRENZE, OGRENZE, SUM
-0008   0180               M         clrf W
-Warning[202]: Argument out of range.  Least significant bits used.
-0009   0820               M         movf UGRENZE,70h
-  0000                    M         local start
-000A   0770               M         addwf 70h,W
-000B   0AF0               M         incf 70h,f
-Warning[202]: Argument out of range.  Least significant bits used.
-000C   0880               M         movf W,0x71
-000D   0870               M         movf 0x70,W
-000E   0221               M         subwf OGRENZE,W
-000F   1903               M         SKPNZ
-0010   2800               M         goto start
-0011   0871               M         movf 0x71,W
-0012   2812           00048         goto $
-                      00049         END                       ; directive 'end of program'
-MPASM  5.51                         SUMME.ASM   10-5-2021  20:26:19         PAGE  3
+0004                  00045 main
+0004   3008           00046         movlw .8
+0005   00A0           00047         movwf UGRENZE
+0006   3014           00048         movlw .20
+0007   00A1           00049         movwf OGRENZE
+                      00050         SUMME UGRENZE, OGRENZE, SUM
+0008   01F1               M         clrf 71h
+0009   0820               M         movf UGRENZE,W
+000A   00F0               M         movwf 70h
+000B                      M add
+000B   0871               M         movf 71h,W
+000C   0770               M         addwf 70h,W
+000D   00F1               M         movwf 71h       
+000E   0AF0               M         incf 70h,f
+000F   0870               M         movf 70h,W
+0010   0221               M         subwf OGRENZE,W
+0011   1803               M         SKPNC
+0012   280B               M         goto add
+0013   0871               M         movf 71h,W
+0014   00A2               M         movwf SUM
+0015   0000           00051         NOP
+0016   2816           00052         goto $
+                      00053         END                       ; directive 'end of program'
+MPASM  5.51                         SUMME.ASM   10-5-2021  22:39:26         PAGE  3
 
 
 SYMBOL TABLE
@@ -140,7 +145,7 @@ CHS1                              00000004
 CHS2                              00000005
 CIS                               00000003
 CKE                               00000006
-MPASM  5.51                         SUMME.ASM   10-5-2021  20:26:19         PAGE  4
+MPASM  5.51                         SUMME.ASM   10-5-2021  22:39:26         PAGE  4
 
 
 SYMBOL TABLE
@@ -199,7 +204,7 @@ INTF                              00000001
 IRP                               00000007
 NOT_A                             00000005
 NOT_ADDRESS                       00000005
-MPASM  5.51                         SUMME.ASM   10-5-2021  20:26:19         PAGE  5
+MPASM  5.51                         SUMME.ASM   10-5-2021  22:39:26         PAGE  5
 
 
 SYMBOL TABLE
@@ -258,7 +263,7 @@ RA5                               00000005
 RB0                               00000000
 RB1                               00000001
 RB2                               00000002
-MPASM  5.51                         SUMME.ASM   10-5-2021  20:26:19         PAGE  6
+MPASM  5.51                         SUMME.ASM   10-5-2021  22:39:26         PAGE  6
 
 
 SYMBOL TABLE
@@ -317,7 +322,7 @@ SSPADD                            00000093
 SSPBUF                            00000013
 SSPCON                            00000014
 SSPCON2                           00000091
-MPASM  5.51                         SUMME.ASM   10-5-2021  20:26:19         PAGE  7
+MPASM  5.51                         SUMME.ASM   10-5-2021  22:39:26         PAGE  7
 
 
 SYMBOL TABLE
@@ -376,7 +381,7 @@ TRISA4                            00000004
 TRISA5                            00000005
 TRISB                             00000086
 TRISB0                            00000000
-MPASM  5.51                         SUMME.ASM   10-5-2021  20:26:19         PAGE  8
+MPASM  5.51                         SUMME.ASM   10-5-2021  22:39:26         PAGE  8
 
 
 SYMBOL TABLE
@@ -435,7 +440,7 @@ _BOREN_OFF                        00003FBF
 _BOREN_ON                         00003FFF
 _CONFIG                           00002007
 _CPD_OFF                          00003FFF
-MPASM  5.51                         SUMME.ASM   10-5-2021  20:26:19         PAGE  9
+MPASM  5.51                         SUMME.ASM   10-5-2021  22:39:26         PAGE  9
 
 
 SYMBOL TABLE
@@ -474,22 +479,29 @@ _WRT_OFF                          00003FFF
 _XT_OSC                           00003FFD
 __16F877A                         00000001
 __DEBUG                           1
+add                               0000000B
 main                              00000004
 
 
 MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
 
-0000 : XX--XXXXXXXXXXXX XXX------------- ---------------- ----------------
+0000 : XX--XXXXXXXXXXXX XXXXXXX--------- ---------------- ----------------
 2000 : -------X-------- ---------------- ---------------- ----------------
 
 All other memory blocks unused.
 
-Program Memory Words Used:    17
-Program Memory Words Free:  8175
+Program Memory Words Used:    21
+Program Memory Words Free:  8171
+
+
+MPASM  5.51                         SUMME.ASM   10-5-2021  22:39:26         PAGE 10
+
+
+
 
 
 Errors   :     0
-Warnings :     2 reported,     0 suppressed
+Warnings :     0 reported,     0 suppressed
 Messages :     0 reported,     0 suppressed
 
 
