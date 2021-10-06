@@ -1,0 +1,45 @@
+;SUMME ALLER NATÜRLICHEN ZAHLEN ZWISCHEN START UND STOPP => ERGEBNIS
+;z.B.: (START = 5)   (STOPP = 7)  =>  (ERGEBNIS = 18)  
+SUMME macro START, STOPP, ERGEBNIS
+	clrf ERGEBNIS
+	movf START,W
+	movwf 70h
+add
+	movf ERGEBNIS,W
+	addwf 70h,W
+	movwf ERGEBNIS	
+	incf 70h,f
+	movf 70h,W
+	subwf STOPP,W
+	SKPNC
+	goto add
+	endm
+
+;MOVE FILE REGISTER 1 -> FILE REGISTER 2 
+MOVFF macro FROM, TO
+	movf FROM, W
+	movwf TO
+	endm
+
+;SUM1+SUM2->SUM
+ADD8 macro SUM1,SUM2,SUM
+	movf SUM1,W
+	addwf SUM2,W
+	movwf SUM
+	endm
+
+;SUM1HL+SUM2HL->SUMHL
+ADD16 macro SUM1H, SUM1L,SUM2H,SUM2L,SUMH,SUML
+	ADD8 SUM1H,SUM2H,SUMH
+	ADD8 SUM1L,SUM2L,SUML
+	SKPNC
+	incf SUMH,f
+	endm
+
+;L->DEST
+MOVLF macro L,DEST
+	movlw L
+	movwf DEST
+	endm
+
+
