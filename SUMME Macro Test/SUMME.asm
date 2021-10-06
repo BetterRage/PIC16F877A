@@ -1,7 +1,7 @@
 
 	list		p=16f877A		; list directive to define processor
 	#include	<p16f877a.inc>	; processor specific variable definitions
-	
+	#include 	"..\MACRO.asm"
 ;	__CONFIG _CP_OFF & _WDT_OFF & _BODEN_OFF & _PWRTE_ON & _RC_OSC & _WRT_OFF & _LVP_ON & _CPD_OFF
 	__CONFIG _CP_OFF & _WDT_OFF & _BODEN_OFF & _PWRTE_ON & _HS_OSC & _WRT_OFF & _LVP_OFF & _CPD_OFF
 
@@ -16,24 +16,14 @@
 	UGRENZE:1
 	OGRENZE:1
 	SUM:1
+	GUN:1
+	SUM1H:1
+	SUM1L:1
+	SUM2H:1
+	SUM2L:1
+	SUMH:1
+	SUML:1
 	ENDC
-
-SUMME macro START, STOPP, ERGEBNIS
-	clrf 71h
-	movf START,W
-	movwf 70h
-add
-	movf 71h,W
-	addwf 70h,W
-	movwf 71h	
-	incf 70h,f
-	movf 70h,W
-	subwf STOPP,W
-	SKPNC
-	goto add
-	movf 71h,W
-	movwf ERGEBNIS
-	endm
 ;**********************************************************************
 	ORG     0x000      	; processor reset vector
 	clrf	PCLATH
@@ -43,12 +33,16 @@ add
 ; isr code can go here or be located as a call subroutine elsewhere
 
 main
-	movlw .8
-	movwf UGRENZE
-	movlw .20
-	movwf OGRENZE
+	MOVLF .8,UGRENZE
+	MOVLF .11,OGRENZE
+	MOVLF .8,SUM1H
+	MOVLF .4,SUM1L
+	MOVLF .8,SUM2H
+	MOVLF .4,SUM2L
 	SUMME UGRENZE, OGRENZE, SUM
-	NOP
+	MOVFF SUM,GUN
+	ADD16 SUM1H,SUM1L,SUM2H,SUM2L,SUMH,SUML
+	ADD8 SUM1H,SUM2L,SUMH
 	goto $
 	END                       ; directive 'end of program'
 
