@@ -3,13 +3,13 @@
 SUMME macro START, STOPP, ERGEBNIS
 	clrf ERGEBNIS
 	movf START,W
-	movwf 70h
+	movwf 71h
 add
 	movf ERGEBNIS,W
-	addwf 70h,W
+	addwf 71h,W
 	movwf ERGEBNIS	
-	incf 70h,f
-	movf 70h,W
+	incf 71h,f
+	movf 71h,W
 	subwf STOPP,W
 	SKPNC
 	goto add
@@ -40,6 +40,23 @@ ADD16 macro SUM1H, SUM1L,SUM2H,SUM2L,SUMH,SUML
 MOVLF macro L,DEST
 	movlw L
 	movwf DEST
+	endm
+
+;BILDET DIE SUMME ALLER BYTES VON STARTADDR BIS STARTADDR + OFFSET
+ARRAYSUM macro STARTADDR,OFFSET,SUMME
+	clrf 0x71 
+	clrf SUMME
+loop
+	movlw UGRENZE
+	addwf 0x71,W
+	movwf FSR
+	movf INDF,W
+	addwf SUMME,f
+	incf 0x71,f
+	movf 0x71,W
+	subwf GUN,W
+	SKPZ
+	goto loop
 	endm
 
 
