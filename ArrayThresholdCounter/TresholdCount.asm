@@ -18,6 +18,8 @@
 	SUM:1
 	GUN:1
 	ZSUM:1
+	COMPARE:1
+	OFFSET:1
 	ENDC
 ;**********************************************************************
 	ORG     0x000      	; processor reset vector
@@ -29,13 +31,15 @@
 
 main
 	clrf ZSUM
-	MOVLF .22,UGRENZE
-	MOVLF .11,OGRENZE
-	MOVLF .33,SUM
+	clrf OFFSET
+	MOVLF .20,UGRENZE
+	MOVLF .19,OGRENZE
+	MOVLF .22,SUM
 	MOVLF .3,GUN
-	ARRAYSUM UGRENZE,GUN,ZSUM
-	
-	
+	MOVLF .20,COMPARE
+	SMALLERTHRESHOLD UGRENZE,GUN,COMPARE,ZSUM
+	clrf ZSUM
+	GREATERTHRESHOLD UGRENZE,GUN,COMPARE,ZSUM
 	goto $
 	END                       ; directive 'end of program'
 
