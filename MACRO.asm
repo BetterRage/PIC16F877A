@@ -61,7 +61,7 @@ loop
 	endm
 
 ;Zählt alle elemente im speicher von 
-;startaddr bis startaddr+offset die größer oder gleich compare sind
+;startaddr bis startaddr+offset die größer als compare sind
 GREATERTHRESHOLD macro STARTADDR,OFFSET,COMPARE,COUNT
 	local loop
 	clrf 71h
@@ -69,9 +69,9 @@ loop
 	movlw STARTADDR
 	addwf 71h,W
 	movwf FSR
-	movf COMPARE,W
-	subwf INDF,W
-	SKPNC
+	movf INDF,W
+	subwf COMPARE,W
+	SKPC
 	incf COUNT,F
 	incf 71h,F
 	movf OFFSET,W
@@ -92,6 +92,26 @@ loop
 	movf COMPARE,W
 	subwf INDF,W
 	SKPC
+	incf COUNT,F
+	incf 71h,F
+	movf OFFSET,W
+	subwf 71h,W
+	SKPC
+	goto loop
+	endm
+
+;Zählt alle elemente im speicher von 
+;startaddr bis startaddr+offset die gleich compare sind
+SMALLERTHRESHOLD macro STARTADDR,OFFSET,COMPARE,COUNT
+	local loop
+	clrf 71h
+loop
+	movlw STARTADDR
+	addwf 71h,W
+	movwf FSR
+	movf COMPARE,W
+	subwf INDF,W
+	SKPNZ
 	incf COUNT,F
 	incf 71h,F
 	movf OFFSET,W
