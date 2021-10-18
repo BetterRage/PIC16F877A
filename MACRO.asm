@@ -102,7 +102,7 @@ loop
 
 ;Zählt alle elemente im speicher von 
 ;startaddr bis startaddr+offset die gleich compare sind
-SMALLERTHRESHOLD macro STARTADDR,OFFSET,COMPARE,COUNT
+EQUALTHRESHOLD macro STARTADDR,OFFSET,COMPARE,COUNT
 	local loop
 	clrf 71h
 loop
