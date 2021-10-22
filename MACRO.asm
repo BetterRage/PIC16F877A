@@ -120,4 +120,68 @@ loop
 	goto loop
 	endm
 
+;setzt den speicher von Startaddr bis startaddr+offset auf 0
+MEMCLEAR macro STARTADDR,OFFSET
+	local loop
+	MOVLF OFFSET,0x71
+	movlw STARTADDR
+	movwf FSR
+loop
+	clrf INDF
+	incf FSR,f
+	decfsz 0x71,f
+	goto loop
+	endm
+
+LEADING0REPLACE macro STARTADDR,OFFSET
+	local loop
+	MOVLF OFFSET,0x71
+	movlw ASCII
+	movwf FSR
+loop
+	movlw '0'
+	subwf INDF,w
+	SKPZ
+	goto stop
+	MOVLF ' ',INDF
+	incf FSR,f
+	decfsz 0x71,f
+	goto loop
+stop
+	endm
+
+BYTETOBCD macro BYTE,DEST
+	local count100
+	local count10
+	local endcount
+	MEMCLEAR DEST,.3
+	MOVLF BYTE,0x71
+	MOVFF 0x71,DEST+.2
+count100
+	movf DEST+.2,W
+	sublw .100
+	SKPNC
+	goto count10
+	incf DEST,f
+	movlw .100
+	subwf DEST+.2,f
+	goto count100
+count10
+	movf DEST+.2,W
+	sublw .10
+	SKPNC
+	goto endcount
+	incf DEST+.1,f
+	movlw .10
+	subwf DEST+.2,f
+	goto count10
+endcount
+	movlw '0'
+	addwf DEST+.2,f
+	addwf DEST+.1,f
+	addwf DEST,f
+	endm
+
+	
+
 
