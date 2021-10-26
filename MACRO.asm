@@ -42,7 +42,7 @@ MOVLF macro L,DEST
 	movwf DEST
 	endm
 
-;BILDET DIE SUMME ALLER BYTES VON STARTADDR BIS STARTADDR + OFFSET
+;BILDET DIE SUMME ALLER LITERALS VON STARTADDR BIS STARTADDR + OFFSET
 ARRAYSUM macro STARTADDR,OFFSET,SUMME
 	local loop
 	clrf 0x71 
@@ -150,12 +150,44 @@ loop
 stop
 	endm
 
-BYTETOBCD macro BYTE,DEST
+LITERALTOBCD macro LITERAL,DEST
 	local count100
 	local count10
 	local endcount
 	MEMCLEAR DEST,.3
-	MOVLF BYTE,0x71
+	MOVLF LITERAL,0x71
+	MOVFF 0x71,DEST+.2
+count100
+	movf DEST+.2,W
+	sublw .100
+	SKPNC
+	goto count10
+	incf DEST,f
+	movlw .100
+	subwf DEST+.2,f
+	goto count100
+count10
+	movf DEST+.2,W
+	sublw .10
+	SKPNC
+	goto endcount
+	incf DEST+.1,f
+	movlw .10
+	subwf DEST+.2,f
+	goto count10
+endcount
+	movlw '0'
+	addwf DEST+.2,f
+	addwf DEST+.1,f
+	addwf DEST,f
+	endm
+
+FILETOBCD macro FILE,DEST
+	local count100
+	local count10
+	local endcount
+	MEMCLEAR DEST,.3
+	MOVFF FILE,0x71
 	MOVFF 0x71,DEST+.2
 count100
 	movf DEST+.2,W

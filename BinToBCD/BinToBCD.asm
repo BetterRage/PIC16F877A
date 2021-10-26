@@ -49,7 +49,8 @@
   	goto    main      	; go to beginning of program
 	ORG     0x004      	; interrupt vector location
 main
-	BYTETOBCD .3,ASCII
+	MOVLF .20,0x24
+	FILETOBCD 0x24,ASCII
 	LEADING0REPLACE ASCII,.3
 
 	goto main
