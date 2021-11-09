@@ -1,0 +1,3 @@
+Message[302] C:\PIC16F877A\TASTENAUSLESENSINGLE\MAIN.ASM 50 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\PIC16F877A\TASTENAUSLESENSINGLE\MAIN.ASM 51 : Register in operand not in bank 0.  Ensure that bank bits are correct.
+Message[302] C:\PIC16F877A\TASTENAUSLESENSINGLE\MAIN.ASM 53 : Register in operand not in bank 0.  Ensure that bank bits are correct.

@@ -1,0 +1,757 @@
+MPASM  5.51                          MAIN.ASM   11-9-2021  15:47:01         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 ;################################################################################################
+                      00002 ;   This file is a basic code template for assembly code generation   *
+                      00003 ;   on the PIC16F877A. This file contains the basic code              *
+                      00004 ;   building blocks to build upon.                                    *  
+                      00005 ;                                                                     *
+                      00006 ;   Refer to the MPASM User's Guide for additional information on     *
+                      00007 ;   features of the assembler (Document DS33014).                     *
+                      00008 ;                                                                     *
+                      00009 ;   Refer to the respective PIC data sheet for additional             *
+                      00010 ;   information on the instruction set.                               *
+                      00011 ;                                                                     *
+                      00012 ;**********************************************************************
+                      00013 ;    Filename:      xxx.asm                                           *
+                      00014 ;    Date:                                                            *
+                      00015 ;    File Version:                                                    *
+                      00016 ;                                                                     *
+                      00017 ;    Author:                                                          *
+                      00018 ;    Company:                                                         *
+                      00019 ;**********************************************************************
+                      00020 ;    Files Required: P16F877A.INC                                     *
+                      00021 ;**********************************************************************
+                      00022 ;    Notes:                                                           *
+                      00023 ;**********************************************************************
+                      00024 
+                      00025 
+                      00026         list            p=16f877A               ; list directive to define processor
+                      00027         #include        <p16f877A.inc>  ; processor specific variable definitions
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ;  MPASM PIC16F877A processor include
+                      00005 ; 
+                      00006 ;  (c) Copyright 1999-2013 Microchip Technology, All rights reserved
+                      00007 ;==========================================================================
+                      00008 
+                      00566         LIST
+                      00028         #include "..\MACRO.asm"
+                      00001 ;SUMME ALLER NATÜRLICHEN ZAHLEN ZWISCHEN START UND STOPP => ERGEBNIS
+                      00002 ;z.B.: (START = 5)   (STOPP = 7)  =>  (ERGEBNIS = 18)  
+                      00003 SUMME macro START, STOPP, ERGEBNIS
+                      00004         local add
+                      00005         clrf ERGEBNIS
+                      00006         MOVFF START,71h
+                      00007 add
+                      00008         movf ERGEBNIS,W
+                      00009         addwf 71h,W
+                      00010         movwf ERGEBNIS  
+                      00011         incf 71h,f
+                      00012         movf 71h,W
+                      00013         subwf STOPP,W
+                      00014         SKPNC
+                      00015         goto add
+                      00016         endm
+MPASM  5.51                          MAIN.ASM   11-9-2021  15:47:01         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00017 
+                      00018 ;MOVE FILE REGISTER 1 -> FILE REGISTER 2 
+                      00019 MOVFF macro FROM, TO
+                      00020         movf FROM, W
+                      00021         movwf TO
+                      00022         endm
+                      00023 
+                      00024 ;SUM1+SUM2->SUM
+                      00025 ADD8 macro SUM1,SUM2,SUM
+                      00026         movf SUM1,W
+                      00027         addwf SUM2,W
+                      00028         movwf SUM
+                      00029         endm
+                      00030 
+                      00031 ;SUM1HL+SUM2HL->SUMHL
+                      00032 ADD16 macro SUM1H, SUM1L,SUM2H,SUM2L,SUMH,SUML
+                      00033         ADD8 SUM1H,SUM2H,SUMH
+                      00034         ADD8 SUM1L,SUM2L,SUML
+                      00035         SKPNC
+                      00036         incf SUMH,f
+                      00037         endm
+                      00038 
+                      00039 ;L->DEST
+                      00040 MOVLF macro L,DEST
+                      00041         movlw L
+                      00042         movwf DEST
+                      00043         endm
+                      00044 
+                      00045 ;BILDET DIE SUMME ALLER LITERALS VON STARTADDR BIS STARTADDR + OFFSET
+                      00046 ARRAYSUM macro STARTADDR,OFFSET,SUMME
+                      00047         local loop
+                      00048         clrf 0x71 
+                      00049         clrf SUMME
+                      00050 loop
+                      00051         movlw UGRENZE
+                      00052         addwf 0x71,W
+                      00053         movwf FSR
+                      00054         movf INDF,W
+                      00055         addwf SUMME,f
+                      00056         incf 0x71,f
+                      00057         movf 0x71,W
+                      00058         subwf GUN,W
+                      00059         SKPZ
+                      00060         goto loop
+                      00061         endm
+                      00062 
+                      00063 ;Zählt alle elemente im speicher von 
+                      00064 ;startaddr bis startaddr+offset die größer als compare sind
+                      00065 GREATERTHRESHOLD macro STARTADDR,OFFSET,COMPARE,COUNT
+                      00066         local loop
+                      00067         clrf 71h
+                      00068 loop
+                      00069         movlw STARTADDR
+MPASM  5.51                          MAIN.ASM   11-9-2021  15:47:01         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00070         addwf 71h,W
+                      00071         movwf FSR
+                      00072         movf INDF,W
+                      00073         subwf COMPARE,W
+                      00074         SKPC
+                      00075         incf COUNT,F
+                      00076         incf 71h,F
+                      00077         movf OFFSET,W
+                      00078         subwf 71h,W
+                      00079         SKPC
+                      00080         goto loop
+                      00081         endm
+                      00082 
+                      00083 ;Zählt alle elemente im speicher von 
+                      00084 ;startaddr bis startaddr+offset die kleiner als compare sind
+                      00085 SMALLERTHRESHOLD macro STARTADDR,OFFSET,COMPARE,COUNT
+                      00086         local loop
+                      00087         clrf 71h
+                      00088 loop
+                      00089         movlw STARTADDR
+                      00090         addwf 71h,W
+                      00091         movwf FSR
+                      00092         movf COMPARE,W
+                      00093         subwf INDF,W
+                      00094         SKPC
+                      00095         incf COUNT,F
+                      00096         incf 71h,F
+                      00097         movf OFFSET,W
+                      00098         subwf 71h,W
+                      00099         SKPC
+                      00100         goto loop
+                      00101         endm
+                      00102 
+                      00103 ;Zählt alle elemente im speicher von 
+                      00104 ;startaddr bis startaddr+offset die gleich compare sind
+                      00105 EQUALTHRESHOLD macro STARTADDR,OFFSET,COMPARE,COUNT
+                      00106         local loop
+                      00107         clrf 71h
+                      00108 loop
+                      00109         movlw STARTADDR
+                      00110         addwf 71h,W
+                      00111         movwf FSR
+                      00112         movf COMPARE,W
+                      00113         subwf INDF,W
+                      00114         SKPNZ
+                      00115         incf COUNT,F
+                      00116         incf 71h,F
+                      00117         movf OFFSET,W
+                      00118         subwf 71h,W
+                      00119         SKPC
+                      00120         goto loop
+                      00121         endm
+                      00122 
+MPASM  5.51                          MAIN.ASM   11-9-2021  15:47:01         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00123 ;setzt den speicher von Startaddr bis startaddr+offset auf 0
+                      00124 MEMCLEAR macro STARTADDR,OFFSET
+                      00125         local loop
+                      00126         MOVLF OFFSET,0x71
+                      00127         movlw STARTADDR
+                      00128         movwf FSR
+                      00129 loop
+                      00130         clrf INDF
+                      00131         incf FSR,f
+                      00132         decfsz 0x71,f
+                      00133         goto loop
+                      00134         endm
+                      00135 
+                      00136 LEADING0REPLACE macro STARTADDR,OFFSET
+                      00137         local loop
+                      00138         MOVLF OFFSET,0x71
+                      00139         movlw ASCII
+                      00140         movwf FSR
+                      00141 loop
+                      00142         movlw '0'
+                      00143         subwf INDF,w
+                      00144         SKPZ
+                      00145         goto stop
+                      00146         MOVLF ' ',INDF
+                      00147         incf FSR,f
+                      00148         decfsz 0x71,f
+                      00149         goto loop
+                      00150 stop
+                      00151         endm
+                      00152 
+                      00153 LITERALTOBCD macro LITERAL,DEST
+                      00154         local count100
+                      00155         local count10
+                      00156         local endcount
+                      00157         MEMCLEAR DEST,.3
+                      00158         MOVLF LITERAL,0x71
+                      00159         MOVFF 0x71,DEST+.2
+                      00160 count100
+                      00161         movf DEST+.2,W
+                      00162         sublw .100
+                      00163         SKPNC
+                      00164         goto count10
+                      00165         incf DEST,f
+                      00166         movlw .100
+                      00167         subwf DEST+.2,f
+                      00168         goto count100
+                      00169 count10
+                      00170         movf DEST+.2,W
+                      00171         sublw .10
+                      00172         SKPNC
+                      00173         goto endcount
+                      00174         incf DEST+.1,f
+                      00175         movlw .10
+MPASM  5.51                          MAIN.ASM   11-9-2021  15:47:01         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00176         subwf DEST+.2,f
+                      00177         goto count10
+                      00178 endcount
+                      00179         movlw '0'
+                      00180         addwf DEST+.2,f
+                      00181         addwf DEST+.1,f
+                      00182         addwf DEST,f
+                      00183         endm
+                      00184 
+                      00185 FILETOBCD macro FILE,DEST
+                      00186         local count100
+                      00187         local count10
+                      00188         local endcount
+                      00189         MEMCLEAR DEST,.3
+                      00190         MOVFF FILE,0x71
+                      00191         MOVFF 0x71,DEST+.2
+                      00192 count100
+                      00193         movf DEST+.2,W
+                      00194         sublw .100
+                      00195         SKPNC
+                      00196         goto count10
+                      00197         incf DEST,f
+                      00198         movlw .100
+                      00199         subwf DEST+.2,f
+                      00200         goto count100
+                      00201 count10
+                      00202         movf DEST+.2,W
+                      00203         sublw .10
+                      00204         SKPNC
+                      00205         goto endcount
+                      00206         incf DEST+.1,f
+                      00207         movlw .10
+                      00208         subwf DEST+.2,f
+                      00209         goto count10
+                      00210 endcount
+                      00211         movlw '0'
+                      00212         addwf DEST+.2,f
+                      00213         addwf DEST+.1,f
+                      00214         addwf DEST,f
+                      00215         endm
+                      00216 
+                      00217         
+                      00218 
+                      00219 
+                      00029 ;       __CONFIG _CP_OFF & _WDT_OFF & _BODEN_OFF & _PWRTE_ON & _RC_OSC & _WRT_OFF & _LVP_ON & _CPD_OFF
+2007   3F3A           00030         __CONFIG _CP_OFF & _WDT_OFF & _BODEN_OFF & _PWRTE_OFF & _HS_OSC & _WRT_OFF & _LVP_OFF & _CPD_OFF
+                      00031 
+                      00032 ; '__CONFIG' directive is used to embed configuration data within .asm file.
+                      00033 ; The lables following the directive are located in the respective .inc file.
+                      00034 ; See respective data sheet for additional information on configuration word.
+                      00035 
+                      00036 
+                      00037 ;***** VARIABLE DEFINITIONS
+MPASM  5.51                          MAIN.ASM   11-9-2021  15:47:01         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00038 
+                      00039         CBLOCK 0x71
+  00000071            00040         INPUT:1
+                      00041         ENDC
+                      00042 ;**********************************************************************
+0000                  00043         ORG     0x000           ; processor reset vector
+0000   018A           00044         clrf    PCLATH
+0001   2804           00045         goto    begin           ; go to beginning of program
+0004                  00046         ORG     0x004           ; interrupt vector location
+                      00047 
+0004                  00048 begin
+0004   1683 1303      00049         BANKSEL TRISC
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0006   0187           00050         clrf TRISC
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0007   1381           00051         bcf OPTION_REG,7
+0008   3007           00052         movlw .7
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0009   0486           00053         iorwf TRISB,f
+000A   1283 1303      00054         BANKSEL PORTB
+000C                  00055 main
+000C   0906           00056         comf PORTB,w
+000D   3907           00057         andlw .7
+000E   00F1           00058         movwf INPUT
+000F   0807           00059         movf PORTC,w
+0010   39F8           00060         andlw b'11111000'
+0011   0471           00061         iorwf INPUT,w
+0012   0087           00062         movwf PORTC
+0013   280C           00063         goto main
+                      00064         END                       ; directive 'end of program'
+MPASM  5.51                          MAIN.ASM   11-9-2021  15:47:01         PAGE  7
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ACKDT                             00000005
+ACKEN                             00000004
+ACKSTAT                           00000006
+ADCON0                            0000001F
+ADCON1                            0000009F
+ADCS0                             00000006
+ADCS1                             00000007
+ADCS2                             00000006
+ADD16                             
+ADD8                              
+ADDEN                             00000003
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+ARRAYSUM                          
+BCLIE                             00000003
+BCLIF                             00000003
+BF                                00000000
+BRGH                              00000002
+C                                 00000000
+C1INV                             00000004
+C1OUT                             00000006
+C2INV                             00000005
+C2OUT                             00000007
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCP2CON                           0000001D
+CCP2IE                            00000000
+CCP2IF                            00000000
+CCP2M0                            00000000
+CCP2M1                            00000001
+CCP2M2                            00000002
+CCP2M3                            00000003
+CCP2X                             00000005
+CCP2Y                             00000004
+CCPR1                             00000015
+CCPR1H                            00000016
+CCPR1L                            00000015
+CCPR2                             0000001B
+CCPR2H                            0000001C
+CCPR2L                            0000001B
+CHS0                              00000003
+CHS1                              00000004
+MPASM  5.51                          MAIN.ASM   11-9-2021  15:47:01         PAGE  8
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+CHS2                              00000005
+CIS                               00000003
+CKE                               00000006
+CKP                               00000004
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             0000009C
+CMIE                              00000006
+CMIF                              00000006
+CREN                              00000004
+CSRC                              00000007
+CVR0                              00000000
+CVR1                              00000001
+CVR2                              00000002
+CVR3                              00000003
+CVRCON                            0000009D
+CVREN                             00000007
+CVROE                             00000006
+CVRR                              00000005
+D                                 00000005
+DATA_ADDRESS                      00000005
+DC                                00000001
+D_A                               00000005
+D_NOT_A                           00000005
+EEADR                             0000010D
+EEADRH                            0000010F
+EECON1                            0000018C
+EECON2                            0000018D
+EEDATA                            0000010C
+EEDATH                            0000010E
+EEIE                              00000004
+EEIF                              00000004
+EEPGD                             00000007
+EQUALTHRESHOLD                    
+F                                 00000001
+FERR                              00000002
+FILETOBCD                         
+FSR                               00000004
+GCEN                              00000007
+GIE                               00000007
+GO                                00000002
+GO_DONE                           00000002
+GO_NOT_DONE                       00000002
+GREATERTHRESHOLD                  
+I2C_DATA                          00000005
+I2C_READ                          00000002
+I2C_START                         00000003
+I2C_STOP                          00000004
+IBF                               00000007
+IBOV                              00000005
+INDF                              00000000
+INPUT                             00000071
+MPASM  5.51                          MAIN.ASM   11-9-2021  15:47:01         PAGE  9
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IRP                               00000007
+LEADING0REPLACE                   
+LITERALTOBCD                      
+MEMCLEAR                          
+MOVFF                             
+MOVLF                             
+NOT_A                             00000005
+NOT_ADDRESS                       00000005
+NOT_BO                            00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000002
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_RC8                           00000006
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+NOT_TX8                           00000006
+NOT_W                             00000002
+NOT_WRITE                         00000002
+OBF                               00000006
+OERR                              00000001
+OPTION_REG                        00000081
+P                                 00000004
+PCFG0                             00000000
+PCFG1                             00000001
+PCFG2                             00000002
+PCFG3                             00000003
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PEN                               00000002
+PIE1                              0000008C
+PIE2                              0000008D
+PIR1                              0000000C
+PIR2                              0000000D
+PORTA                             00000005
+PORTB                             00000006
+PORTC                             00000007
+PORTD                             00000008
+PORTE                             00000009
+PR2                               00000092
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+PSPIE                             00000007
+PSPIF                             00000007
+MPASM  5.51                          MAIN.ASM   11-9-2021  15:47:01         PAGE 10
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+PSPMODE                           00000004
+R                                 00000002
+RA0                               00000000
+RA1                               00000001
+RA2                               00000002
+RA3                               00000003
+RA4                               00000004
+RA5                               00000005
+RB0                               00000000
+RB1                               00000001
+RB2                               00000002
+RB3                               00000003
+RB4                               00000004
+RB5                               00000005
+RB6                               00000006
+RB7                               00000007
+RBIE                              00000003
+RBIF                              00000000
+RC0                               00000000
+RC1                               00000001
+RC2                               00000002
+RC3                               00000003
+RC4                               00000004
+RC5                               00000005
+RC6                               00000006
+RC7                               00000007
+RC8_9                             00000006
+RC9                               00000006
+RCD8                              00000000
+RCEN                              00000003
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+RD                                00000000
+RD0                               00000000
+RD1                               00000001
+RD2                               00000002
+RD3                               00000003
+RD4                               00000004
+RD5                               00000005
+RD6                               00000006
+RD7                               00000007
+RE0                               00000000
+RE1                               00000001
+RE2                               00000002
+READ_WRITE                        00000002
+RP0                               00000005
+RP1                               00000006
+RSEN                              00000001
+RX9                               00000006
+RX9D                              00000000
+R_NOT_W                           00000002
+MPASM  5.51                          MAIN.ASM   11-9-2021  15:47:01         PAGE 11
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+R_W                               00000002
+S                                 00000003
+SEN                               00000000
+SMALLERTHRESHOLD                  
+SMP                               00000007
+SPBRG                             00000099
+SPEN                              00000007
+SREN                              00000005
+SSPADD                            00000093
+SSPBUF                            00000013
+SSPCON                            00000014
+SSPCON2                           00000091
+SSPEN                             00000005
+SSPIE                             00000003
+SSPIF                             00000003
+SSPM0                             00000000
+SSPM1                             00000001
+SSPM2                             00000002
+SSPM3                             00000003
+SSPOV                             00000006
+SSPSTAT                           00000094
+STATUS                            00000003
+SUMME                             
+SYNC                              00000004
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1INSYNC                          00000002
+T1OSCEN                           00000003
+T1SYNC                            00000002
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+MPASM  5.51                          MAIN.ASM   11-9-2021  15:47:01         PAGE 12
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRISA                             00000085
+TRISA0                            00000000
+TRISA1                            00000001
+TRISA2                            00000002
+TRISA3                            00000003
+TRISA4                            00000004
+TRISA5                            00000005
+TRISB                             00000086
+TRISB0                            00000000
+TRISB1                            00000001
+TRISB2                            00000002
+TRISB3                            00000003
+TRISB4                            00000004
+TRISB5                            00000005
+TRISB6                            00000006
+TRISB7                            00000007
+TRISC                             00000087
+TRISC0                            00000000
+TRISC1                            00000001
+TRISC2                            00000002
+TRISC3                            00000003
+TRISC4                            00000004
+TRISC5                            00000005
+TRISC6                            00000006
+TRISC7                            00000007
+TRISD                             00000088
+TRISD0                            00000000
+TRISD1                            00000001
+TRISD2                            00000002
+TRISD3                            00000003
+TRISD4                            00000004
+TRISD5                            00000005
+TRISD6                            00000006
+TRISD7                            00000007
+TRISE                             00000089
+TRISE0                            00000000
+TRISE1                            00000001
+TRISE2                            00000002
+TRMT                              00000001
+TX8_9                             00000006
+TX9                               00000006
+TX9D                              00000000
+TXD8                              00000000
+TXEN                              00000005
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+UA                                00000001
+W                                 00000000
+WCOL                              00000007
+MPASM  5.51                          MAIN.ASM   11-9-2021  15:47:01         PAGE 13
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_BOREN_OFF                        00003FBF
+_BOREN_ON                         00003FFF
+_CONFIG                           00002007
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_ALL                           00001FFF
+_CP_OFF                           00003FFF
+_CP_ON                            00001FFF
+_DEBUG_OFF                        00003FFF
+_DEBUG_ON                         000037FF
+_DEVID1                           00002006
+_FOSC_EXTRC                       00003FFF
+_FOSC_HS                          00003FFE
+_FOSC_LP                          00003FFC
+_FOSC_XT                          00003FFD
+_HS_OSC                           00003FFE
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_LP_OSC                           00003FFC
+_LVP_OFF                          00003F7F
+_LVP_ON                           00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FF7
+_RC_OSC                           00003FFF
+_WDTE_OFF                         00003FFB
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FFB
+_WDT_ON                           00003FFF
+_WRT_1FOURTH                      00003BFF
+_WRT_256                          00003DFF
+_WRT_HALF                         000039FF
+_WRT_OFF                          00003FFF
+_XT_OSC                           00003FFD
+__16F877A                         00000001
+__DEBUG                           1
+__MPLAB_DEBUGGER_PK3              1
+begin                             00000004
+main                              0000000C
+MPASM  5.51                          MAIN.ASM   11-9-2021  15:47:01         PAGE 14
+
+
+MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
+
+
+0000 : XX--XXXXXXXXXXXX XXXX------------ ---------------- ----------------
+2000 : -------X-------- ---------------- ---------------- ----------------
+
+All other memory blocks unused.
+
+Program Memory Words Used:    18
+Program Memory Words Free:  8174
+
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     3 reported,     0 suppressed
+
+
