@@ -30,8 +30,12 @@
 	movwf WREGS
 	MOVFF STATUS,SREGS
 	MOVLF .16,TMR0
-	call signal1
-	call signal2
+	movf PORTC,w
+	andlw b'11111100'
+	movwf PORTC
+	movf SIGNALCOUNT,w
+	call signal
+	iorwf PORTC,f	
 	incf SIGNALCOUNT,f
 	movlw .11
 	subwf SIGNALCOUNT,w
@@ -40,7 +44,7 @@
 	MOVFF SREGS,STATUS
 	swapf WREGS,f
 	swapf WREGS,w
-	retfie
+	return
 	
 begin
 	clrf SIGNALCOUNT
@@ -57,55 +61,17 @@ begin
 main
 	goto main
 
-signal1
-	rlf SIGNALCOUNT,w
+signal
 	addwf PCL,f
-	bsf PORTC,0
-	return
-	bsf PORTC,0
-	return
-	bsf PORTC,0
-	return
-	bsf PORTC,0
-	return
-	bcf PORTC,0
-	return
-	bcf PORTC,0
-	return
-	bcf PORTC,0
-	return
-	bsf PORTC,0
-	return
-	bsf PORTC,0
-	return
-	bsf PORTC,0
-	return
-	bcf PORTC,0
-	return
-
-signal2
-	rlf SIGNALCOUNT,w
-	addwf PCL,f
-	bsf PORTC,1
-	return
-	bsf PORTC,1
-	return
-	bsf PORTC,1
-	return
-	bsf PORTC,1
-	return
-	bsf PORTC,1
-	return
-	bsf PORTC,1
-	return
-	bcf PORTC,1
-	return
-	bcf PORTC,1
-	return
-	bcf PORTC,1
-	return
-	bsf PORTC,1
-	return
-	bcf PORTC,1
-	return
+	retlw .3
+	retlw .3
+	retlw .3
+	retlw .3
+	retlw .2
+	retlw .2
+	retlw .0
+	retlw .1	
+	retlw .1	
+	retlw .3	
+	retlw .0
 	END
