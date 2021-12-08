@@ -44,7 +44,7 @@
 	MOVFF SREGS,STATUS
 	swapf WREGS,f
 	swapf WREGS,w
-	return
+	retfie
 	
 begin
 	clrf SIGNALCOUNT
@@ -54,6 +54,7 @@ begin
 	bsf OPTION_REG, PSA
 	bcf OPTION_REG,	T0CS
 	BANKSEL PORTC
+	clrf PORTC
 	bsf INTCON,GIE
  	bsf INTCON,TMR0IE
 	bcf INTCON,TMR0IF
