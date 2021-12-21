@@ -214,6 +214,19 @@ endcount
 	addwf DEST,f
 	endm
 
+;setzt die 1 in BIT auch in DST und ignoriert 0
+BITSET macro DST,BIT
+	movf DST,w
+	iorlw BIT
+	movwf DST
+	endm
+BITCLEAR macro DST,BIT
+	movf DST,w
+	andlw BIT
+	movwf DST
+	endm
+	
+
 	
 
 
